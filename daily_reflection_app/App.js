@@ -5,12 +5,19 @@ import MonthlySummaryChart from './Monthly';
 
 const App = () => {
   const data = [
-    { name: 'Satisfaction ', value: 30 },
-    { name: 'Category B', value: 40 },
-    { name: 'Category C', value: 40 },
-    { name: 'Category D', value: 40 },
-    { name: 'Category E', value: 40 },
-    // Add more data as needed
+    { month: 'January', value: 8 },
+    { month: 'February', value: 7 },
+    { month: 'March', value: 9 },
+    { month: 'April', value: 5 },
+    { month: 'May', value: 6 },
+    { month: 'June', value: 8 },
+    { month: 'July', value: 7 },
+    { month: 'August', value: 9 },
+    { month: 'September', value: 8 },
+    { month: 'October', value: 6 },
+    { month: 'November', value: 7 },
+    { month: 'December', value: 9 },
+    // Add more as needed
   ];
 
   return (
