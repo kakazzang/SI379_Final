@@ -16,9 +16,13 @@ const MonthlySummaryChart = ({ width, data }) => {
     .sort(null)
     .value(d => d.value);
 
+   // Define your custom colors here
+   const customColors = ['#FF0000', '#FF7400', '#FFC100', '#79c314', '#487de7', '#4b369d', '#70369d', '#FF0000', '#FF7400', '#FFC100', '#79c314', '#487de7', '#4b369d', '#70369d'];
+
   const color = d3.scaleOrdinal()
     .domain(data.map(d => d.month))
-    .range(d3.schemeCategory10);
+    // .range(d3.schemeCategory10);
+    .range(customColors);
 
   const svg = (
     <Svg
@@ -44,7 +48,7 @@ const MonthlySummaryChart = ({ width, data }) => {
           >
             <TSpan dy="-0.4em" fontWeight="bold">{d.data.month}</TSpan>
             {(d.endAngle - d.startAngle) > 0.25 && (
-              <TSpan x={0} dy="0.7em" fillOpacity={0.7}>
+              <TSpan x={0} dy="1.5em" fillOpacity={0.7}>
                 {d.data.value.toLocaleString("en-US")}
               </TSpan>
             )}
