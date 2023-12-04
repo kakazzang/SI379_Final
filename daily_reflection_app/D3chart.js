@@ -57,8 +57,11 @@ const D3Chart = ({ data, width }) => {
   return (
     <View>
       {/* Your chart will be rendered here */}
+      <Text style={styles.title}>Your Chart Title</Text>
     </View>
   );
 };
+
+
 
 export default D3Chart;
