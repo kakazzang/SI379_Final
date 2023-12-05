@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { View, Text, Button, StyleSheet } from 'react-native';
-import { StatusBar } from 'expo-status-bar';
+// import { StatusBar } from 'expo-status-bar';
 
 const ChatGPTDemo = () => {
   const [generatedQuestion, setGeneratedQuestion] = useState('');
+  const authData = require('./auth.json');
+  const openaiApiKey = authData.openaiApiKey;
 
   const generateRandomQuestion = async () => {
-    const openaiApiKey = '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';
+
     const apiUrl = 'https://api.openai.com/v1/chat/completions';
 
     const requestBody = {
@@ -56,12 +58,9 @@ const ChatGPTDemo = () => {
 
   return (
     <View style={styles.container}>
-      <NativeBaseProvider>
-        <Box>Hello world</Box>
-      </NativeBaseProvider>
       <Text>Generated Question: {generatedQuestion}</Text>
       <Button title="Generate Random Question" onPress={generateRandomQuestion} />
-      <StatusBar style="auto" />
+      {/* <StatusBar style="auto" /> */}
     </View>
   );
 };
