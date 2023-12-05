@@ -1,47 +1,35 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, StatusBar } from 'react-native';
 import { Calendar } from 'react-native-calendars';
 
 const CalendarScreen = () => {
-  // Placeholder data for November 30th
   const [selectedDate, setSelectedDate] = useState('');
-  const [notes, setNotes] = useState({
-    '2023-11-30': 'This is a placeholder note for November 30th.'
-  });
+
+  // Sample data for notes
+  const notes = {
+    '2023-11-30': 'Meeting with team at 10 AM. Discuss project roadmap.'
+    // Add more notes here if needed
+  };
 
   // Function to handle date selection
   const onDayPress = (day) => {
     setSelectedDate(day.dateString);
   };
 
-  // Function to display the selected date and its note
-  const renderNote = () => {
-    if (!selectedDate) return <Text>Select a date to see notes</Text>;
-
-    const noteForDate = notes[selectedDate];
-    return (
-      <View>
-        <Text style={styles.dateText}>Selected Date: {selectedDate}</Text>
-        <Text style={styles.noteText}>
-          {noteForDate ? noteForDate : 'No note for this date'}
-        </Text>
-      </View>
-    );
-  };
-
-  // Generate marked dates for the calendar
-  const markedDates = Object.keys(notes).reduce((acc, date) => {
-    acc[date] = { marked: true };
-    return acc;
-  }, {});
-
   return (
     <View style={styles.container}>
+      <StatusBar translucent backgroundColor="transparent" />
       <Calendar
         onDayPress={onDayPress}
-        markedDates={markedDates}
+        markedDates={{
+          '2023-11-30': { marked: true }
+        }}
       />
-      {renderNote()}
+      {selectedDate && notes[selectedDate] && (
+        <View style={styles.noteView}>
+          <Text style={styles.noteText}>{notes[selectedDate]}</Text>
+        </View>
+      )}
     </View>
   );
 };
@@ -50,18 +38,17 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
-    padding: 40,
+    padding: 20,
     justifyContent: 'center',
   },
-  dateText: {
-    fontSize: 18,
-    fontWeight: 'bold',
+  noteView: {
     marginTop: 20,
+    padding: 10,
+    backgroundColor: '#f0f0f0',
+    borderRadius: 5,
   },
   noteText: {
     fontSize: 16,
-    marginTop: 10,
-    marginBottom: 20,
   }
 });
 
