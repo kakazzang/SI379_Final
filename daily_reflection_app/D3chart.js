@@ -22,6 +22,7 @@ const D3Chart = ({ data, width }) => {
       .range(d3.quantize(t => d3.interpolateSpectral(t * 0.8 + 0.1), data.length).reverse());
 
     // Create an SVG element using react-native-svg components
+    // create
     const paths = pie(data).map((d, index) => (
       <Path
         key={index}
