@@ -1,5 +1,7 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+// import { View, Text, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
+import { Card, Text } from 'react-native-elements';
 import * as d3 from 'd3';
 import Svg, { G, Path, Text as SvgText, TSpan } from 'react-native-svg';
 
@@ -58,20 +60,44 @@ const MonthlySummaryChart = ({ width, data }) => {
     </Svg>
   );
 
-  return (
-    <View>
-      <Text style={styles.title}>Monthly Satisfaction Score Summary</Text>
+//   return (
+//     <View>
+//       <Text style={styles.title}>Monthly Satisfaction Score Summary</Text>
+//       {svg}
+//     </View>
+//   );
+// };
+return (
+  <Card containerStyle={styles.card}>
+    <Card.Title style={styles.title}>Monthly Satisfaction Score Summary</Card.Title>
+    <Card.Divider />
+    <View style={styles.chartContainer}>
       {svg}
     </View>
-  );
+  </Card>
+);
 };
 
+// const styles = StyleSheet.create({
+//   title: {
+//     fontSize: 18,
+//     fontWeight: 'bold',
+//     textAlign: 'center',
+//     marginBottom: 10,
+//   },
+// });
 const styles = StyleSheet.create({
+  card: {
+    margin: 10,
+    borderRadius: 10,
+  },
   title: {
     fontSize: 18,
     fontWeight: 'bold',
     textAlign: 'center',
-    marginBottom: 10,
+  },
+  chartContainer: {
+    alignItems: 'center',
   },
 });
 
