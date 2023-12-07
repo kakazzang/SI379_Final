@@ -3,7 +3,7 @@ import { View, StyleSheet, StatusBar } from 'react-native';
 import MonthlySummaryChart from './monthly';
 import SummaryNavigation from './summarynav';
 
-const App = () => {
+const Data = () => {
   const data = [
   { date: "2023-11-28", regretLevel: 1 },
   { date: "2023-11-29", regretLevel: 2 },
@@ -35,4 +35,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default App;
+export default Data;
