@@ -2,6 +2,7 @@ import React, { useRef, useEffect, useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import Svg, { G, Line, Path, Text as SvgText, Circle } from 'react-native-svg';
 import * as d3 from 'd3';
+import { format, startOfMonth, endOfMonth } from 'date-fns';
 
 const WeeklySummaryChart = ({ data }) => {
   const chartRef = useRef(null);
@@ -15,14 +16,11 @@ const WeeklySummaryChart = ({ data }) => {
 
   useEffect(() => {
     if (data && data.length > 0) {
-
       x = d3.scaleTime()
-        // .domain(d3.extent(data, d => new Date(d.date)))
-        .domain(d3.extent(formattedData, d => d.date))
+        .domain(d3.extent(data, d => new Date(d.date)))
         .range([0, width]);
 
       y = d3.scaleLinear()
-        // .domain([0, d3.max(data, d => d.regretLevel)])
         .domain([0, 5])
         .range([height, 0]);
 
@@ -32,7 +30,6 @@ const WeeklySummaryChart = ({ data }) => {
 
       const linePath = line(data);
 
-      // Set the chart content to be rendered outside of useEffect
       setChartContent(
         <G transform={`translate(${margin.left}, ${margin.top})`}>
           {/* x-axis */}
@@ -46,8 +43,6 @@ const WeeklySummaryChart = ({ data }) => {
 
           {/* Arrowhead for x-axis */}
           <Path
-            // d={`M${width},${height} L${width - 8},${height - 6} L${width - 8},${height + 6} Z`}
-            // d={`M${width + 10},${height} L${width + 2},${height - 6} L${width + 2},${height + 6} Z`}
             d={`M${width + 20},${height} L${width + 12},${height - 6} L${width + 12},${height + 6} Z`}
             fill="black"
           />
@@ -61,16 +56,15 @@ const WeeklySummaryChart = ({ data }) => {
               fontSize="10"
               textAnchor="middle"
               transform={`rotate(-90 ${x(new Date(datum.date))},${height + margin.bottom - 32})`}
-              
             >
-              {d3.timeFormat('%m/%d')(new Date(datum.date))}
+              {format(new Date(datum.date), 'MMM yyyy')}
             </SvgText>
           ))}
-          
+
           {/* x-axis title */}
           <SvgText
             x={width / 2}
-            y={height + margin.bottom / 1.}
+            y={height + margin.bottom / 1}
             fontSize="12"
             textAnchor="middle"
             fontWeight="bold"
@@ -107,16 +101,16 @@ const WeeklySummaryChart = ({ data }) => {
             </SvgText>
           ))}
 
-            <SvgText
-              x={-margin.left / 2}
-              y={height / 2.3}
-              fontSize="12"
-              textAnchor="middle"
-              transform={`rotate(-90 ${-margin.left / 2},${height / 2})`}
-              fontWeight="bold"
-            >
-              Regret Level
-            </SvgText>
+          <SvgText
+            x={-margin.left / 2}
+            y={height / 2.3}
+            fontSize="12"
+            textAnchor="middle"
+            transform={`rotate(-90 ${-margin.left / 2},${height / 2})`}
+            fontWeight="bold"
+          >
+            Regret Level
+          </SvgText>
 
           {/* Line chart path */}
           <Path d={linePath} fill="none" stroke="steelblue" strokeWidth={1.5} />
@@ -127,8 +121,8 @@ const WeeklySummaryChart = ({ data }) => {
               key={index}
               cx={x(new Date(datum.date))}
               cy={y(datum.regretLevel)}
-              r={4} 
-              fill="#3BB0E5" 
+              r={4}
+              fill="#3BB0E5"
             />
           ))}
         </G>
@@ -138,7 +132,7 @@ const WeeklySummaryChart = ({ data }) => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>11/27-12/4 Satisfaction Score Summary</Text>
+      <Text style={styles.title}>Monthly Satisfaction Score Summary</Text>
       <View style={styles.chartContainer}>
         <Svg width={width + margin.left + margin.right} height={height + margin.top + margin.bottom} ref={chartRef}>
           {chartContent}

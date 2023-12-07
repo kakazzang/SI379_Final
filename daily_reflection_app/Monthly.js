@@ -1,3 +1,4 @@
+// Actually WEEKLY
 import React, { useRef, useEffect, useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import Svg, { G, Line, Path, Text as SvgText, Circle } from 'react-native-svg';
