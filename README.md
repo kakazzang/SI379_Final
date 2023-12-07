@@ -6,7 +6,10 @@ To get started with this project, follow these steps:
 Clone the Repository
 
 git clone https://github.com/kakazzang/SI379_Final.git
+
 cd daily_reflection_app/
+
+
 
 Install Dependencies
 
