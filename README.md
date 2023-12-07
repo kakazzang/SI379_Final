@@ -30,3 +30,5 @@ Usage
 Before using the application, you need to set up your own ChatGPT key. Follow these steps:
 
 The API key, more description of the tools/ libraries utilized, and rationale of the project are located in this document: https://docs.google.com/document/d/1YfkuabBK65hPV5lqIYoqQNqkQGNtUS0-YHqfW1qxL34/edit?usp=sharing
+
+The video demonstration of how user could interact with the app is located in this link: https://drive.google.com/file/d/1DpcAHNDoDmF4ZT9KL3MOc4X9zIznrgwR/view?usp=drive_link
