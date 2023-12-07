@@ -20,12 +20,12 @@ const AppNavigation = () => {
               iconName = 'edit';
             } else if (route.name === 'Calendar') {
               iconName = 'calendar';
-            } else if (route.name === 'Data') {
+            } else if (route.name === 'Summary') {
               iconName = 'bar-chart';
             }
 
             // Set color based on whether the tab is focused
-            const tabColor = focused ? '#3BB0E5' : 'gray'; 
+            const tabColor = focused ? '#3BB0E5' : 'gray';
 
             return (
               <View>
@@ -56,7 +56,7 @@ const AppNavigation = () => {
       >
         <Tab.Screen name="Prompt" component={PromptScreen} />
         <Tab.Screen name="Calendar" component={CalendarScreen} />
-        <Tab.Screen name="Data" component={DataScreen} />
+        <Tab.Screen name="Summary" component={DataScreen} />
       </Tab.Navigator>
     </NavigationContainer>
   );
