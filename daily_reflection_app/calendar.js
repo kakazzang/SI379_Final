@@ -7,7 +7,7 @@ const CalendarScreen = () => {
 
   // Sample data for notes
   const notes = {
-    '2023-11-30': 'Meeting with team at 10 AM. Discuss project roadmap.',
+    '2023-11-30': 'When participants were in a happy mood, they processed information more globally compared to when they were in a sad mood.',
     // Add more notes here if needed
   };
 
@@ -30,7 +30,7 @@ const CalendarScreen = () => {
       markedDates[selectedDate] = { 
         ...markedDates[selectedDate],
         selected: true, 
-        selectedColor: 'lightblue' // You can change the color as needed
+        selectedColor: '#3BB0E5' // You can change the color as needed
       };
     }
 
@@ -38,7 +38,7 @@ const CalendarScreen = () => {
   };
 
   return (
-    <View>
+    <View style={styles.container}>
       <Calendar
         onDayPress={onDayPress}
         markedDates={getMarkedDates()}
@@ -53,13 +53,28 @@ const CalendarScreen = () => {
 };
 const styles = StyleSheet.create({
     noteView: {
-      marginTop: 20,
-      padding: 10,
-      backgroundColor: '#f0f0f0',
-      borderRadius: 5,
+      marginTop: 16,
+      paddingTop: 12,
+      paddingBottom:12,
+      paddingLeft: 16,
+      paddingRight: 16,
+      backgroundColor: 'white',
+      borderRadius: 24,
+      borderColor:'#3BB0E5',
+      borderWidth: 1,
+      shadowColor: '#2C2C2C',
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.05,
+      shadowRadius: 2,
     },
     noteText: {
-      fontSize: 16,
+      fontSize: 14,
+      fontWeight: 'medium',
+      lineHeight: 18,
+    },
+    container:{
+      flex: 1,
+      backgroundColor:"white",
     }
   });
 
