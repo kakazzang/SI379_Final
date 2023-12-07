@@ -4,7 +4,7 @@ import { createMaterialTopTabNavigator } from '@react-navigation/material-top-ta
 import { View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import MonthlySummaryChart from './monthly';
+// import MonthlySummaryChart from './monthly';
 import WeeklySummaryChart from './weekly';
 
 // const Tab = createBottomTabNavigator();
