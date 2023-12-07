@@ -9,6 +9,7 @@ git clone https://github.com/kakazzang/SI379_Final.git
 cd daily_reflection_app/
 
 Install Dependencies
+
 npm install
 
 
