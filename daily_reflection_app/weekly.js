@@ -19,7 +19,7 @@ const WeeklySummaryChart = ({ data }) => {
         .range([0, width]);
 
       const y = d3.scaleLinear()
-        .domain([1, 5])
+        .domain([0, 5])
         .range([height, 0]);
 
       const line = d3.line()
@@ -34,12 +34,15 @@ const WeeklySummaryChart = ({ data }) => {
 
       setChartContent(
         <G transform={`translate(${margin.left}, ${margin.top})`}>
+
           {/* x-axis */}
           <Line x1={0} y1={height} x2={width} y2={height} stroke="black" />
+
           {/* y-axis */}
           <Line x1={0} y1={0} x2={0} y2={height} stroke="black" />
           {/* Line chart path */}
           <Path d={linePath} fill="none" stroke="steelblue" strokeWidth={2} />
+
           {/* Monthly average line */}
           <Path d={averageLinePath} fill="none" stroke="red" strokeWidth={2} strokeDasharray="5,5" />
           {/* Circles at each data point */}
@@ -70,7 +73,7 @@ const WeeklySummaryChart = ({ data }) => {
             .map((d, i) => (
               <SvgText
                 key={i}
-                x={x(d)}
+                x={x(d) + 15}
                 y={height + 15}
                 fontSize="10"
                 textAnchor="middle"
@@ -78,8 +81,9 @@ const WeeklySummaryChart = ({ data }) => {
                 {format(d, 'MM/dd')}
               </SvgText>
             ))}
+
           {/* y-axis labels */}
-          {d3.range(1, 6).map((tick, i) => (
+          {d3.range(0, 6).map((tick, i) => (
             <SvgText
               key={i}
               x={-10}
@@ -113,7 +117,7 @@ const WeeklySummaryChart = ({ data }) => {
         <View style={[styles.legendLine, { marginRight: 40, borderColor: '#3BB0E5' }]}/>
         <Text style={styles.legendText}>Average Regret</Text>
         <View style={[styles.legendLine, { borderStyle: 'dotted', borderColor : 'red' }]} />
-    </View>
+      </View>
     </View>
   );
 };
