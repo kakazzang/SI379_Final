@@ -20,15 +20,6 @@ const styles = StyleSheet.create({
     marginTop: 48,
     // justifyContent: 'center',
   },
-  noteView: {
-    marginTop: 20,
-    padding: 10,
-    backgroundColor: '#f0f0f0',
-    borderRadius: 5,
-  },
-  noteText: {
-    fontSize: 16,
-  }
 });
 
 export default App;

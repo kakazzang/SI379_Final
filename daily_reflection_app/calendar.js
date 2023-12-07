@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Calendar } from 'react-native-calendars';
 import * as SQLite from 'expo-sqlite';
 import { format } from 'date-fns';
+import { useFocusEffect } from '@react-navigation/native';
 
 const CalendarScreen = () => {
   const [selectedDate, setSelectedDate] = useState('');
@@ -38,9 +39,11 @@ const CalendarScreen = () => {
     });
   };
 
-  useEffect(() => {
-    fetchNotesFromDatabase();
-  }, []); // Fetch notes on component mount
+  useFocusEffect(
+    useCallback(() => {
+      fetchNotesFromDatabase();
+    }, [])
+  );
 
   // Function to handle date selection
   const onDayPress = (day) => {
@@ -51,25 +54,14 @@ const CalendarScreen = () => {
   const getMarkedDates = () => {
     let markedDates = {};
 
-    // Populate marked dates with user answer and regret level
     Object.keys(notes).forEach((date) => {
       markedDates[date] = {
         marked: true,
         selected: selectedDate === date,
         selectedColor: 'lightblue', // You can change the color as needed
-        customStyles: {
-          container: {
-            backgroundColor: 'lightblue',
-          },
-          text: {
-            color: 'black',
-          },
-        },
-        text: `${notes[date].userAnswer}\nRegret Level: ${notes[date].regretLevel}`,
       };
     });
 
-    // Highlight the selected date
     if (selectedDate) {
       markedDates[selectedDate] = {
         ...markedDates[selectedDate],
@@ -85,16 +77,46 @@ const CalendarScreen = () => {
     <View style={styles.container}>
       <Calendar onDayPress={onDayPress} markedDates={getMarkedDates()} />
       {selectedDate && notes[selectedDate] ? (
-        <View style={styles.noteView}>
-          <Text style={styles.noteText}>User Answer: {notes[selectedDate].userAnswer}</Text>
-          <Text style={styles.noteText}>Regret Level: {notes[selectedDate].regretLevel}</Text>
-        </View>
+        <>
+          <View style={styles.dataView}>
+            <Text style={styles.dataText}>Regret Level: {notes[selectedDate].regretLevel}</Text>
+          </View>
+          <View style={styles.noteView}>
+            <Text style={styles.noteText}>User Answer: {notes[selectedDate].userAnswer}</Text>
+          </View>
+        </>
       ) : null}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
+  dataView: {
+    marginTop: 16,
+    paddingTop: 12,
+    paddingBottom: 12,
+    paddingLeft: 16,
+    paddingRight: 16,
+    backgroundColor: '#3BB0E5',
+    borderRadius: 24,
+    borderColor: '#3BB0E5',
+    borderWidth: 1,
+    shadowColor: '#2C2C2C',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+  },
+  dataText:{
+    fontSize: 16,
+    fontWeight: 'bold',
+    textAlignVertical: 'top', 
+    color:'white',
+  },
+  noteText: {
+    fontSize: 14,
+    fontWeight: 'medium',
+    lineHeight: 18,
+  },
   noteView: {
     marginTop: 16,
     paddingTop: 12,
@@ -109,11 +131,6 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
     shadowRadius: 2,
-  },
-  noteText: {
-    fontSize: 14,
-    fontWeight: 'medium',
-    lineHeight: 18,
   },
   container: {
     flex: 1,
