@@ -2,10 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, StyleSheet, ActivityIndicator, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import Slider from '@react-native-community/slider';
 import { NativeBaseProvider, Button } from 'native-base';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { format } from 'date-fns';
 import * as SQLite from 'expo-sqlite';
-import * as FileSystem from 'expo-file-system';
 
 const ChatGPTDemo = () => {
   const [generatedQuestion, setGeneratedQuestion] = useState('');
@@ -16,45 +14,51 @@ const ChatGPTDemo = () => {
   // Open or create the database
   const db = SQLite.openDatabase('data.db');
 
-  const createTableAndOpenDB = () => {
-    return new Promise((resolve, reject) => {
-      db.transaction(
-        (tx) => {
-          tx.executeSql(
-            'CREATE TABLE IF NOT EXISTS data (date TEXT PRIMARY KEY, regretLevel INTEGER, userAnswer TEXT);',
-            [],
-            (tx, results) => {
-              console.log('Table created successfully');
-              resolve();
-            },
-            (tx, error) => {
-              console.error('Error creating table:', error);
-              reject(error);
-            }
-          );
+  // Function to create the data table if not exists
+  const createTable = () => {
+    db.transaction((tx) => {
+      tx.executeSql('DROP TABLE IF EXISTS data;', []);
+      tx.executeSql(
+        'CREATE TABLE IF NOT EXISTS data (date TEXT PRIMARY KEY, regretLevel INTEGER, userAnswer TEXT);',
+        [],
+        (tx, results) => {
+          console.log('Table created successfully');
+
+          // comment back if need to insert more data
+          insertManualData(tx);
         },
-        (error) => {
-          console.error('Error in transaction:', error);
-          reject(error);
-        },
-        () => {
-          // Success callback (optional)
-          console.log('Transaction completed successfully');
+        (tx, error) => {
+          console.error('Error creating table:', error);
         }
       );
     });
   };
 
-  // Call createTableAndOpenDB on component mount
+  const insertManualData = (tx) => {
+    const manualData = [
+      { date: '2023-11-28T00:00:00Z', regretLevel: 1, userAnswer: 'Answer 3' },
+      { date: '2023-12-03T00:00:00Z', regretLevel: 1, userAnswer: 'Answer 4' },
+      // Add more entries as needed
+    ];
+
+    manualData.forEach((entry) => {
+      
+      tx.executeSql(
+        'INSERT OR IGNORE INTO data (date, regretLevel, userAnswer) VALUES (?, ?, ?);',
+        [entry.date, entry.regretLevel, entry.userAnswer],
+        (tx, results) => {
+          console.log(`Data for ${entry.date} inserted successfully`);
+        },
+        (tx, error) => {
+          console.error(`Error inserting data for ${entry.date}:`, error);
+        }
+      );
+    });
+  };
+
+  // Call createTable on component mount
   useEffect(() => {
-    (async () => {
-      try {
-        await createTableAndOpenDB();
-        // ... (other code)
-      } catch (error) {
-        console.error('Error opening database:', error);
-      }
-    })();
+    createTable();
   }, []);
 
   const generateRandomQuestion = async () => {
@@ -73,7 +77,7 @@ const ChatGPTDemo = () => {
         },
         {
           role: 'user',
-          content: 'Generate a random question for me about dairy in less than 15 words.',
+          content: 'Generate a random question for me about are you satisfied with what you did today/ how regret you are for the choices you make in today in less than 15 words and simple language.',
         },
       ],
     };
@@ -83,7 +87,9 @@ const ChatGPTDemo = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${openaiApiKey}`,
+
+          // comment back when need to refresh the question
+          // 'Authorization': `Bearer ${openaiApiKey}`,
         },
         body: JSON.stringify(requestBody),
       });
@@ -99,6 +105,7 @@ const ChatGPTDemo = () => {
       console.error('Error:', error.message);
     } finally {
       setLoading(false);
+
     }
   };
 
@@ -108,90 +115,59 @@ const ChatGPTDemo = () => {
 
   const saveDataToSQLite = async () => {
     try {
-      const currentDate = format(new Date(), 'yyyy-MM-dd');
-  
+      const currentDate = new Date();
+      // const formattedDate = format(currentDate, 'yyyy-MM-dd');
+      
+      const nextDate = new Date(currentDate);
+      nextDate.setDate(currentDate.getDate() + 1);
+      const formattedDate = nextDate.toLocaleDateString('en-CA', { year: 'numeric', month: '2-digit', day: '2-digit' });
+      console.log('Next day is: ', formattedDate);
+
       // Insert data into the SQLite database
-      await new Promise((resolve, reject) => {
-        db.transaction(
-          (tx) => {
-            tx.executeSql(
-              'INSERT OR REPLACE INTO data (date, regretLevel, userAnswer) VALUES (?, ?, ?);',
-              [currentDate, regretLevel, userAnswer],
-              (_, results) => {
-                console.log('Data inserted successfully');
-                resolve();
-              },
-              (_, error) => {
-                console.error('Error inserting data:', error);
-                reject(error);
+      db.transaction(
+        (tx) => {
+          tx.executeSql(
+            'INSERT OR REPLACE INTO data (date, regretLevel, userAnswer) VALUES (?, ?, ?);', [formattedDate, regretLevel, userAnswer],
+
+            (tx, results) => {
+              console.log('Data inserted successfully');
+            },
+            (tx, error) => {
+              console.error('Error inserting data:', error);
+            }
+          );
+
+          // Retrieve all data from the SQLite database
+          tx.executeSql(
+            'SELECT * FROM data;',
+            [],
+            (_, { rows }) => {
+              const data = {};
+
+              for (let i = 0; i < rows.length; i++) {
+                const row = rows.item(i);
+                const formattedDate = format(new Date(row.date), 'yyyy-MM-dd');
+
+                data[formattedDate] = {
+                  regretLevel: row.regretLevel,
+                  userAnswer: row.userAnswer,
+                };
               }
-            );
-          },
-          (error) => {
-            console.error('Error in transaction:', error);
-            reject(error);
-          }
-        );
-      });
-  
-      await writeDataToJson();
-      console.log('Data saved successfully!');
+
+              // Log the data object to the console
+              console.log('Data in JSON format:', data);
+            },
+            (tx, error) => {
+              console.error('Error selecting data:', error);
+            }
+          );
+        },
+        (error) => {
+          console.error('Transaction error:', error);
+        }
+      );
     } catch (error) {
       console.error('Error saving data:', error.message);
-    }
-  };
-  
-  const writeDataToJson = async () => {
-    try {
-      const data = {};
-  
-      // Retrieve all data from the SQLite database
-      await new Promise((resolve, reject) => {
-        db.transaction(
-          (tx) => {
-            tx.executeSql(
-              'SELECT * FROM data;',
-              [],
-              (_, results) => {
-                const rows = results.rows;
-  
-                for (let i = 0; i < rows.length; i++) {
-                  const row = rows.item(i);
-                  const formattedDate = format(new Date(row.date), 'yyyy-MM-dd');
-  
-                  data[formattedDate] = {
-                    regretLevel: row.regretLevel,
-                    userAnswer: row.userAnswer,
-                  };
-                }
-  
-                resolve();
-              },
-              (_, error) => {
-                console.error('Error selecting data:', error);
-                reject(error);
-              }
-            );
-          },
-          (error) => {
-            console.error('Error in transaction:', error);
-            reject(error);
-          }
-        );
-      });
-  
-      // Write data to 'data.json'
-      const filePath = `${FileSystem.documentDirectory}data.json`;
-      await FileSystem.writeAsStringAsync(filePath, JSON.stringify(data), { encoding: FileSystem.EncodingType.UTF8 });
-  
-      console.log('Data written to data.json successfully:', data);
-
-      // Log the contents of 'data.json' after writing
-      // const fileContent = await FileSystem.readAsStringAsync(filePath);
-      // console.log('Content of data.json after writing:', fileContent);
-
-    } catch (error) {
-      console.error('Error writing data to data.json:', error.message);
     }
   };
 
@@ -208,7 +184,7 @@ const ChatGPTDemo = () => {
       padding: 16,
     },
     input: {
-      height: 40,
+      height: 200,
       borderColor: 'gray',
       borderWidth: 1,
       marginTop: 10,
@@ -218,6 +194,16 @@ const ChatGPTDemo = () => {
     sliderContainer: {
       width: '100%',
       marginTop: 20,
+    },
+    sliderLabels: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      marginBottom: 20,
+      padding: 4,
+    },
+    submitButton: {
+      marginTop: 20,
+      paddingVertical: 10, // Add padding to the vertical axis
     },
   });
 
@@ -237,15 +223,30 @@ const ChatGPTDemo = () => {
             />
             <View style={styles.sliderContainer}>
               <Text>Level of Regrets: {regretLevel}</Text>
-              <Slider
-                minimumValue={1}
-                maximumValue={5}
-                step={1}
-                value={regretLevel}
-                onValueChange={(value) => setRegretLevel(value)}
-              />
+              <View style={styles.sliderContainer}>
+                <Slider
+                  minimumValue={1}
+                  maximumValue={5}
+                  step={1}
+                  value={regretLevel}
+                  onValueChange={(value) => setRegretLevel(value)}
+                />
+                <View style={styles.sliderLabels}>
+                  <Text>1</Text>
+                  <Text>2</Text>
+                  <Text>3</Text>
+                  <Text>4</Text>
+                  <Text>5</Text>
+                </View>
+              </View>
             </View>
-            <Button size="lg" onPress={() => {saveDataToSQLite(); console.log('User Answer:', userAnswer, 'Regret Level:', regretLevel);}}>Submit</Button>
+            <Button
+              size="lg"
+              style={styles.submitButton}
+              onPress={() => { saveDataToSQLite(); console.log('User Answer:', userAnswer, 'Regret Level:', regretLevel); }}
+            >
+              Submit
+            </Button>
           </>
         )}
       </View>
