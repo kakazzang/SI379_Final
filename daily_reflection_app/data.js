@@ -85,8 +85,9 @@ const DataScreen = () => {
       <MonthlySummaryChart data={weeklyData} />
       </View>
     </View>
-  );
-};
+)
+
+}
 
 const styles = StyleSheet.create({
   chart:{
@@ -114,3 +115,4 @@ const styles = StyleSheet.create({
 });
 
 export default DataScreen;
+
