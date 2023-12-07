@@ -1,4 +1,3 @@
-// Actually WEEKLY
 import React, { useRef, useEffect, useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import Svg, { G, Line, Path, Text as SvgText, Circle } from 'react-native-svg';
@@ -16,14 +15,11 @@ const MonthlySummaryChart = ({ data }) => {
 
   useEffect(() => {
     if (data && data.length > 0) {
-
       x = d3.scaleTime()
-        // .domain(d3.extent(data, d => new Date(d.date)))
-        .domain(d3.extent(formattedData, d => d.date))
+        .domain(d3.extent(data, d => new Date(d.date)))
         .range([0, width]);
 
       y = d3.scaleLinear()
-        // .domain([0, d3.max(data, d => d.regretLevel)])
         .domain([0, 5])
         .range([height, 0]);
 
@@ -134,12 +130,20 @@ const MonthlySummaryChart = ({ data }) => {
           ))}
         </G>
       );
+    } else {
+      // Set message when there's not enough data
+      setChartContent(
+      <View style={styles.noDataText}>
+        <Text style={styles.noDataText}>
+          Not enough data to create a chart.
+        </Text>
+      </View>
+      );
     }
   }, [data]);
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>11/27-12/4 Satisfaction Score Summary</Text>
       <View style={styles.chartContainer}>
         <Svg width={width + margin.left + margin.right} height={height + margin.top + margin.bottom} ref={chartRef}>
           {chartContent}
@@ -164,6 +168,9 @@ const styles = StyleSheet.create({
     width: 300,
     height: 200,
   },
+  noDataText: {
+    textAlign: 'center',
+  }
 });
 
 export default MonthlySummaryChart;

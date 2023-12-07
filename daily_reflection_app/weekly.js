@@ -1,162 +1,231 @@
-import React, { useRef, useEffect, useState } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import Svg, { G, Line, Path, Text as SvgText, Circle } from 'react-native-svg';
+// import React, { useEffect, useState } from 'react';
+// import { View, Text, StyleSheet } from 'react-native';
+// import Svg, { G, Rect, Text as SvgText } from 'react-native-svg';
+// import * as d3 from 'd3';
+// import { format } from 'date-fns';
+
+// const WeeklySummaryChart = ({ data }) => {
+//   const containerWidth = '100%';  // Use the desired width for your container
+//   const containerHeight = '100%'; // Use the desired height for your container
+//   const [chartContent, setChartContent] = useState(null);
+
+//   useEffect(() => {
+//     if (data && data.length > 0) {
+//       const margin = { top: 10, right: -40, bottom: 10, left: 40 };
+
+//       const width = containerWidth === '100%' ? 300 : parseInt(containerWidth);
+//       const height = containerHeight === '100%' ? 200 : parseInt(containerHeight);
+
+//       // console.log("data", data)
+//       const groupedData = d3.group(data, (d) => format(new Date(d.date), 'yyyy-MM'));
+      
+//       const x = d3.scaleBand()
+//         // .domain(data.map(d => d.date))
+//         .domain([...groupedData.keys()])
+//         .range([margin.left, width - margin.right])
+//         .padding(0.1);
+
+//       const y = d3.scaleLinear()
+//         // .domain([0, d3.max(data, d => d.regretLevel)])
+//         .domain([0, 5])
+//         .range([height - margin.bottom, margin.top]);
+
+//       const barWidth = x.bandwidth();
+
+//       const bars = data.map((d, i) => (
+//         <Rect
+//           key={i}
+//           x={x(d.date)}
+//           y={y(d.regretLevel)}
+//           width={barWidth}
+//           height={height - margin.bottom - y(d.regretLevel)}
+//           fill="steelblue"
+//         />
+//       ));
+
+//       // x-axis labels
+//       const xLabels = data.map((d, i) => (
+//         <SvgText
+//           key={i}
+//           x={x(d.date) + barWidth / 3}
+//           y={height - margin.bottom + 20}
+//           fontSize="10"
+//           textAnchor="middle"
+//           transform={`rotate(-45 ${x(d.date) + barWidth / 2},${height - margin.bottom + 15})`} // Rotate -45 degrees
+//         >
+//           {d3.timeFormat('%m/%d')(new Date(d.date))}
+//         </SvgText>
+//       ));
+      
+//       // y-axis labels
+//       const yTicks = d3.ticks(0, 5, 6);
+//       const yLabels = yTicks.map((tick, i) => (
+//         <SvgText
+//           key={i}
+//           x={margin.left - 5}
+//           y={y(tick)}
+//           fontSize="10"
+//           textAnchor="end"
+//           dy="3"
+//         >
+//           {tick}
+//         </SvgText>
+//       ));
+
+//       const newChartContent = (
+//         <G>
+//           {/* Bars */}
+//           {bars}
+
+//           {/* X-axis labels */}
+//           {xLabels}
+
+//           {/* Y-axis labels */}
+//           {yLabels}
+//         </G>
+//       );
+
+//       // Update chart content in state
+//       setChartContent(newChartContent);
+//     } else {
+//       // Set message when there's not enough data
+//       setChartContent(
+//       <View style={styles.noDataText}>
+//         <Text style={styles.noDataText}>
+//           Not enough data to create a chart.
+//         </Text>
+//       </View>
+//       );
+//     }
+//   }, [data, containerWidth, containerHeight]);
+
+//   return (
+//     <View style={[styles.container, { width: containerWidth, height: containerHeight }]}>
+//       <Svg width="100%" height="100%">
+//         {chartContent}
+//       </Svg>
+//     </View>
+//   );
+// };
+
+// const styles = StyleSheet.create({
+//   container: {
+//     justifyContent: 'center',
+//     alignItems: 'center',
+//   },
+//   noDataText: {
+//     textAlign: 'center',
+//   }
+// });
+
+// export default WeeklySummaryChart;
+
+// WeeklySummaryChart.js
+import React, { useEffect, useState } from 'react';
+import { View, StyleSheet, Text } from 'react-native';
+import Svg, { G, Rect, Text as SvgText } from 'react-native-svg';
 import * as d3 from 'd3';
-import { format, startOfMonth, endOfMonth } from 'date-fns';
+import { startOfMonth, endOfMonth, format } from 'date-fns';
 
 const WeeklySummaryChart = ({ data }) => {
-  const chartRef = useRef(null);
+  const containerWidth = '100%';
+  const containerHeight = '100%';
   const [chartContent, setChartContent] = useState(null);
-
-  const margin = { top: 20, right: 30, bottom: 50, left: 40 }; // Adjusted left margin
-  const width = 300 - margin.left - margin.right;
-  const height = 200 - margin.top - margin.bottom;
-
-  let x, y; // Define x and y outside useEffect
 
   useEffect(() => {
     if (data && data.length > 0) {
-      x = d3.scaleTime()
-        .domain(d3.extent(data, d => new Date(d.date)))
-        .range([0, width]);
+      const margin = { top: 10, right: -40, bottom: 10, left: 40 };
+      const width = containerWidth === '100%' ? 300 : parseInt(containerWidth);
+      const height = containerHeight === '100%' ? 200 : parseInt(containerHeight);
 
-      y = d3.scaleLinear()
+      // Group data by month
+      const groupedData = d3.group(data, (d) => format(new Date(d.date), 'yyyy-MM'));
+
+      const x = d3.scaleBand()
+        .domain([...groupedData.keys()])
+        .range([margin.left, width - margin.right])
+        .padding(0.1);
+
+      const y = d3.scaleLinear()
         .domain([0, 5])
-        .range([height, 0]);
+        .range([height - margin.bottom, margin.top]);
 
-      const line = d3.line()
-        .x(d => x(new Date(d.date)))
-        .y(d => y(d.regretLevel));
+      const barWidth = x.bandwidth();
 
-      const linePath = line(data);
+      const bars = Array.from(groupedData).map(([month, monthData], i) => (
+        <Rect
+          key={i}
+          x={x(month)}
+          y={y(d3.mean(monthData, d => d.regretLevel))}
+          width={barWidth}
+          height={height - margin.bottom - y(d3.mean(monthData, d => d.regretLevel))}
+          fill="steelblue"
+        />
+      ));
 
-      setChartContent(
-        <G transform={`translate(${margin.left}, ${margin.top})`}>
-          {/* x-axis */}
-          <Line
-            x1={0}
-            y1={height}
-            x2={width + 20}
-            y2={height}
-            stroke="black"
-          />
+      const xLabels = Array.from(groupedData.keys()).map((month, i) => (
+        <SvgText
+          key={i}
+          x={x(month) + barWidth / 2}
+          y={height - margin.bottom + 20}
+          fontSize="10"
+          textAnchor="middle"
+        >
+          {month}
+        </SvgText>
+      ));
 
-          {/* Arrowhead for x-axis */}
-          <Path
-            d={`M${width + 20},${height} L${width + 12},${height - 6} L${width + 12},${height + 6} Z`}
-            fill="black"
-          />
+      const yTicks = d3.ticks(0, 5, 6);
+      const yLabels = yTicks.map((tick, i) => (
+        <SvgText
+          key={i}
+          x={margin.left - 5}
+          y={y(tick)}
+          fontSize="10"
+          textAnchor="end"
+          dy="3"
+        >
+          {tick}
+        </SvgText>
+      ));
 
-          {/* x-axis labels */}
-          {data.map((datum, index) => (
-            <SvgText
-              key={index}
-              x={x(new Date(datum.date))}
-              y={height + margin.bottom - 25}
-              fontSize="10"
-              textAnchor="middle"
-              transform={`rotate(-90 ${x(new Date(datum.date))},${height + margin.bottom - 32})`}
-            >
-              {format(new Date(datum.date), 'MMM yyyy')}
-            </SvgText>
-          ))}
-
-          {/* x-axis title */}
-          <SvgText
-            x={width / 2}
-            y={height + margin.bottom / 1}
-            fontSize="12"
-            textAnchor="middle"
-            fontWeight="bold"
-          >
-            Date
-          </SvgText>
-
-          {/* y-axis */}
-          <Line
-            x1={0}
-            y1={-10}
-            x2={0}
-            y2={height}
-            stroke="black"
-          />
-
-          {/* Arrowhead for y-axis (adjusted) */}
-          <Path
-            d={`M0,${-10} L-6,${-4} L6,${-4} Z`}
-            fill="black"
-          />
-
-          {/* y-axis labels */}
-          {d3.range(0, 10).map((tick) => (
-            <SvgText
-              key={tick}
-              x={-margin.left + 30}
-              y={y(tick)}
-              fontSize="10"
-              textAnchor="end"
-              dy="3"
-            >
-              {tick}
-            </SvgText>
-          ))}
-
-          <SvgText
-            x={-margin.left / 2}
-            y={height / 2.3}
-            fontSize="12"
-            textAnchor="middle"
-            transform={`rotate(-90 ${-margin.left / 2},${height / 2})`}
-            fontWeight="bold"
-          >
-            Regret Level
-          </SvgText>
-
-          {/* Line chart path */}
-          <Path d={linePath} fill="none" stroke="steelblue" strokeWidth={1.5} />
-
-          {/* Circles at each data point */}
-          {data.map((datum, index) => (
-            <Circle
-              key={index}
-              cx={x(new Date(datum.date))}
-              cy={y(datum.regretLevel)}
-              r={4}
-              fill="#3BB0E5"
-            />
-          ))}
+      const newChartContent = (
+        <G>
+          {bars}
+          {xLabels}
+          {yLabels}
         </G>
       );
+
+      setChartContent(newChartContent);
+    } else {
+      setChartContent(
+        <View style={styles.noDataText}>
+          <Text style={styles.noDataText}>
+            Not enough data to create a chart.
+          </Text>
+        </View>
+      );
     }
-  }, [data]);
+  }, [data, containerWidth, containerHeight]);
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Monthly Satisfaction Score Summary</Text>
-      <View style={styles.chartContainer}>
-        <Svg width={width + margin.left + margin.right} height={height + margin.top + margin.bottom} ref={chartRef}>
-          {chartContent}
-        </Svg>
-      </View>
+    <View style={[styles.container, { width: containerWidth, height: containerHeight }]}>
+      <Svg width="100%" height="100%">
+        {chartContent}
+      </Svg>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  title: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 10,
-  },
-  chartContainer: {
-    width: 300,
-    height: 200,
-  },
+  noDataText: {
+    textAlign: 'center',
+  }
 });
 
 export default WeeklySummaryChart;
