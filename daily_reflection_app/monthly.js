@@ -8,7 +8,7 @@ const MonthlySummaryChart = ({ data }) => {
   const [chartContent, setChartContent] = useState(null);
 
   const { width: screenWidth } = Dimensions.get('window');
-  const margin = { top: 20, right: 20, bottom: 40, left: 40 };
+  const margin = { top: 20, right: 30, bottom: 40, left: 40 };
   const width = screenWidth - margin.left - margin.right;
   const height = 300 - margin.top - margin.bottom;
 
@@ -42,19 +42,11 @@ const MonthlySummaryChart = ({ data }) => {
             stroke="black"
           />
 
-          {/* Arrowhead for x-axis */}
-          <Path
-            // d={`M${width},${height} L${width - 8},${height - 6} L${width - 8},${height + 6} Z`}
-            // d={`M${width + 10},${height} L${width + 2},${height - 6} L${width + 2},${height + 6} Z`}
-            d={`M${width + 20},${height} L${width + 12},${height - 6} L${width + 12},${height + 6} Z`}
-            fill="black"
-          />
-
           {/* x-axis labels */}
           {data.map((datum, index) => (
             <SvgText
               key={index}
-              x={x(new Date(datum.date))}
+              x={x(new Date(datum.date)) + 5}
               y={height + margin.bottom - 25}
               fontSize="10"
               textAnchor="middle"
@@ -83,18 +75,12 @@ const MonthlySummaryChart = ({ data }) => {
             stroke="black"
           />
 
-          {/* Arrowhead for y-axis (adjusted) */}
-          <Path
-            d={`M0,${-10} L-6,${-4} L6,${-4} Z`}
-            fill="black"
-          />
-
           {/* y-axis labels */}
           {d3.range(0, 10).map((tick) => (
             <SvgText
               key={tick}
               x={-margin.left + 30}
-              y={y(tick)}
+              y={y(tick) - 10}
               fontSize="10"
               textAnchor="end"
               dy="3"
@@ -148,6 +134,10 @@ const MonthlySummaryChart = ({ data }) => {
           {chartContent}
         </Svg>
       </View>
+      <View style={styles.legendContainer}>
+        <Text style={styles.legendText}>Regret Level</Text>
+        <View style={[styles.legendLine, { marginRight: 40, borderColor: '#3BB0E5' }]}/>
+      </View>
     </View>
   );
 };
@@ -159,7 +149,22 @@ const styles = StyleSheet.create({
   },
   noDataText: {
     textAlign: 'center',
-  }
+  },
+  legendContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  legendText: {
+    fontSize: 12,
+    marginRight: 10,
+  },
+  legendLine: {
+    width: 40,
+    height: 2,
+    marginRight: 10,
+    borderWidth: 2,
+  },
 });
 
 export default MonthlySummaryChart;
