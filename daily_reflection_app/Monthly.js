@@ -15,10 +15,6 @@ const MonthlySummaryChart = ({ data }) => {
 
   useEffect(() => {
     if (data && data.length > 0) {
-      const formattedData = data.map(({ date, regretLevel }) => ({
-        date: new Date(date),
-        regretLevel,
-      }));
 
       x = d3.scaleTime()
         // .domain(d3.extent(data, d => new Date(d.date)))
