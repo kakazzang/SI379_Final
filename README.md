@@ -6,19 +6,19 @@ To get started with this project, follow these steps:
 Download Expo Go at IOS app store
 
 
-- Clone the Repository
+Clone the Repository
 
 git clone https://github.com/kakazzang/SI379_Final.git
 
 cd daily_reflection_app/
 
 
-- Install Dependencies
+Install Dependencies
 
 npm install
 
 
-- To start the Expo development server, run:
+To start the Expo development server, run:
 
 npx expo start
 
