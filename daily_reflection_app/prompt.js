@@ -10,6 +10,7 @@ const ChatGPTDemo = () => {
   const [userAnswer, setUserAnswer] = useState('');
   const [regretLevel, setRegretLevel] = useState(3); // Initial regret level
   const [loading, setLoading] = useState(true);
+  const [submitted, setSubmitted] = useState(false); 
 
   // Open or create the database
   const db = SQLite.openDatabase('data.db');
@@ -36,8 +37,17 @@ const ChatGPTDemo = () => {
 
   const insertManualData = (tx) => {
     const manualData = [
-      { date: '2023-11-28T00:00:00Z', regretLevel: 1, userAnswer: 'Answer 3' },
-      { date: '2023-12-03T00:00:00Z', regretLevel: 1, userAnswer: 'Answer 4' },
+      { date: '2023-11-23T00:00:00Z', regretLevel: 1, userAnswer: 'Answer 1' },
+      { date: '2023-11-24T00:00:00Z', regretLevel: 2, userAnswer: 'Answer 2' },
+      { date: '2023-11-25T00:00:00Z', regretLevel: 3, userAnswer: 'Answer 3' },
+      { date: '2023-11-26T00:00:00Z', regretLevel: 4, userAnswer: 'Answer 4' },
+      { date: '2023-11-27T00:00:00Z', regretLevel: 5, userAnswer: 'Answer 5' },
+      { date: '2023-11-28T00:00:00Z', regretLevel: 4, userAnswer: 'Answer 6' },
+      { date: '2023-11-29T00:00:00Z', regretLevel: 3, userAnswer: 'Answer 7' },
+      { date: '2023-11-30T00:00:00Z', regretLevel: 2, userAnswer: 'Answer 8' },
+      { date: '2023-12-01T00:00:00Z', regretLevel: 1, userAnswer: 'Answer 9' },
+      { date: '2023-12-02T00:00:00Z', regretLevel: 2, userAnswer: 'Answer 10' },
+      { date: '2023-12-03T00:00:00Z', regretLevel: 3, userAnswer: 'Answer 11' },
       // Add more entries as needed
     ];
 
@@ -131,6 +141,7 @@ const ChatGPTDemo = () => {
 
             (tx, results) => {
               console.log('Data inserted successfully');
+              setSubmitted(true);
             },
             (tx, error) => {
               console.error('Error inserting data:', error);
@@ -175,6 +186,45 @@ const ChatGPTDemo = () => {
     generateRandomQuestion();
   }, []);
 
+  const renderTextInputAndSlider = () => {
+    if (submitted) {
+      return (
+        <View style={{ marginTop: 10, opacity: 0.5 }}>
+          <Text>{userAnswer}</Text>
+          <Text>Regret Level: {regretLevel}</Text>
+        </View>
+      );
+    }
+
+    return (
+      <>
+        <TextInput
+          style={styles.input}
+          placeholder="Type your answer here"
+          onChangeText={(text) => setUserAnswer(text)}
+          value={userAnswer}
+        />
+        <View style={styles.sliderContainer}>
+          <Text>Level of Regrets: {regretLevel}</Text>
+          <Slider
+            minimumValue={1}
+            maximumValue={5}
+            step={1}
+            value={regretLevel}
+            onValueChange={(value) => setRegretLevel(value)}
+          />
+          <View style={styles.sliderLabels}>
+            <Text>1</Text>
+            <Text>2</Text>
+            <Text>3</Text>
+            <Text>4</Text>
+            <Text>5</Text>
+          </View>
+        </View>
+      </>
+    );
+  };
+
   const styles = StyleSheet.create({
     container: {
       flex: 1,
@@ -203,7 +253,8 @@ const ChatGPTDemo = () => {
     },
     submitButton: {
       marginTop: 20,
-      paddingVertical: 10, // Add padding to the vertical axis
+      paddingVertical: 10,
+      paddingHorizontal: 20, // Add padding to the vertical axis
     },
   });
 
@@ -215,38 +266,21 @@ const ChatGPTDemo = () => {
         ) : (
           <>
             <Text>Generated Question: {generatedQuestion}</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Type your answer here"
-              onChangeText={(text) => setUserAnswer(text)}
-              value={userAnswer}
-            />
-            <View style={styles.sliderContainer}>
-              <Text>Level of Regrets: {regretLevel}</Text>
-              <View style={styles.sliderContainer}>
-                <Slider
-                  minimumValue={1}
-                  maximumValue={5}
-                  step={1}
-                  value={regretLevel}
-                  onValueChange={(value) => setRegretLevel(value)}
-                />
-                <View style={styles.sliderLabels}>
-                  <Text>1</Text>
-                  <Text>2</Text>
-                  <Text>3</Text>
-                  <Text>4</Text>
-                  <Text>5</Text>
-                </View>
-              </View>
-            </View>
-            <Button
-              size="lg"
-              style={styles.submitButton}
-              onPress={() => { saveDataToSQLite(); console.log('User Answer:', userAnswer, 'Regret Level:', regretLevel); }}
-            >
-              Submit
-            </Button>
+            {renderTextInputAndSlider()}
+            {submitted ? (
+              <Text style={{ marginTop: 20, fontWeight: 'bold' }}>Today's thought is stored!</Text>
+            ) : (
+              <Button
+                size="lg"
+                style={styles.submitButton}
+                onPress={() => {
+                  saveDataToSQLite();
+                  console.log('User Answer:', userAnswer, 'Regret Level:', regretLevel);
+                }}
+              >
+                Submit
+              </Button>
+            )}
           </>
         )}
       </View>

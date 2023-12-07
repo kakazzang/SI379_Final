@@ -69,11 +69,20 @@ const CalendarScreen = () => {
       };
     });
 
+    // Highlight the selected date
+    if (selectedDate) {
+      markedDates[selectedDate] = {
+        ...markedDates[selectedDate],
+        selected: true,
+        selectedColor: '#3BB0E5', // You can change the color as needed
+      };
+    }
+
     return markedDates;
   };
 
   return (
-    <View>
+    <View style={styles.container}>
       <Calendar onDayPress={onDayPress} markedDates={getMarkedDates()} />
       {selectedDate && notes[selectedDate] ? (
         <View style={styles.noteView}>
@@ -87,16 +96,29 @@ const CalendarScreen = () => {
 
 const styles = StyleSheet.create({
   noteView: {
-    marginTop: 20,
-    padding: 10,
-    backgroundColor: '#f0f0f0',
-    borderRadius: 5,
+    marginTop: 16,
+    paddingTop: 12,
+    paddingBottom: 12,
+    paddingLeft: 16,
+    paddingRight: 16,
+    backgroundColor: 'white',
+    borderRadius: 24,
+    borderColor: '#3BB0E5',
+    borderWidth: 1,
+    shadowColor: '#2C2C2C',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
   },
   noteText: {
-    fontSize: 16,
+    fontSize: 14,
+    fontWeight: 'medium',
+    lineHeight: 18,
+  },
+  container: {
+    flex: 1,
+    backgroundColor: 'white',
   },
 });
 
 export default CalendarScreen;
-
-

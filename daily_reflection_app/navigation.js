@@ -25,24 +25,30 @@ const AppNavigation = () => {
               iconName = 'bar-chart';
             }
 
+            // Set color based on whether the tab is focused
+            const tabColor = focused ? '#3BB0E5' : 'gray'; // Change colors as needed
+
             return (
-              <View style>
-                <Icon name={iconName} size={size} color={color} />
+              <View>
+                <Icon name={iconName} size={size} color={tabColor} />
               </View>
             );
           },
           tabBarStyle: {
-            // Add custom styles here
             borderTopWidth: 0,
-            marginTop: 10, 
-            borderRadius: 10, // Optional: if you want rounded corners
-            // Other styling properties can be added here
+            marginTop: 10,
+            borderRadius: 10,
+            // Other styling properties...
           },
+          headerTitleAlign: 'left',
+          headerTitleStyle: {
+          fontSize: 24,
+          backgroundColor: "white",
+          },
+          iconName:{
+            color:"#3BB0E5"
+          }
         })}
-        tabBarOptions={{
-          activeTintColor: 'lightblue',
-          inactiveTintColor: 'gray',
-        }}
       >
         <Tab.Screen name="Prompt" component={PromptScreen} />
         <Tab.Screen name="Calendar" component={CalendarScreen} />
