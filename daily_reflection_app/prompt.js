@@ -99,7 +99,7 @@ const ChatGPTDemo = () => {
           'Content-Type': 'application/json',
 
           // comment back when need to refresh the question
-          // 'Authorization': `Bearer ${openaiApiKey}`,
+          'Authorization': `Bearer ${openaiApiKey}`,
         },
         body: JSON.stringify(requestBody),
       });
@@ -203,16 +203,20 @@ const ChatGPTDemo = () => {
           placeholder="Type your answer here"
           onChangeText={(text) => setUserAnswer(text)}
           value={userAnswer}
+          multiline={true} // Enable multiline
         />
         <View style={styles.sliderContainer}>
-          <Text>Level of Regrets: {regretLevel}</Text>
-          <Slider
-            minimumValue={1}
-            maximumValue={5}
-            step={1}
-            value={regretLevel}
-            onValueChange={(value) => setRegretLevel(value)}
-          />
+        <Text style={styles.sliderLabelText}>Level of Regrets: {regretLevel}</Text>
+        <Slider
+          minimumValue={1}
+          maximumValue={5}
+          step={1}
+          value={regretLevel}
+          onValueChange={(value) => setRegretLevel(value)}
+          minimumTrackTintColor="#3BB0E5"
+          maximumTrackTintColor="#CCCCCC"
+          thumbTintColor="#3BB0E5"
+        />
           <View style={styles.sliderLabels}>
             <Text>1</Text>
             <Text>2</Text>
@@ -226,6 +230,10 @@ const ChatGPTDemo = () => {
   };
 
   const styles = StyleSheet.create({
+    sliderLabelText: {
+      fontSize: 18, // Set your desired font size
+      // You can also add other styling properties like fontWeight, color, etc.
+    },
     container: {
       flex: 1,
       backgroundColor: '#fff',
@@ -234,12 +242,18 @@ const ChatGPTDemo = () => {
       padding: 16,
     },
     input: {
-      height: 200,
-      borderColor: 'gray',
-      borderWidth: 1,
-      marginTop: 10,
-      padding: 10,
+      height:200,
+      borderColor: '#3BB0E5',
+      borderWidth: 2,
+      marginTop: 12,
+      paddingHorizontal: 16,
+      paddingTop:16,
+      paddingBottom:16,
       width: '100%',
+      borderRadius: 24,
+      fontSize: 16,
+      fontWeight: 'medium',
+      lineHeight: 18,
     },
     sliderContainer: {
       width: '100%',
@@ -252,33 +266,75 @@ const ChatGPTDemo = () => {
       padding: 4,
     },
     submitButton: {
+      width:"100%",
+      height:48,
       marginTop: 20,
+      backgroundColor: '#3BB0E5', // Material Design color
+      borderRadius: 8, // Rounded corners
       paddingVertical: 10,
-      paddingHorizontal: 20, // Add padding to the vertical axis
+      paddingHorizontal: 12,
+      elevation: 2, // Shadow for Android
+      shadowColor: '#000', // Shadow for iOS
+      shadowOffset: { width: 0, height: 2 },
+      shadowRadius: 2,
+      shadowOpacity: 0.25,
     },
+    confirmationText: {
+      marginTop: 20,
+      fontWeight: 'bold',
+      fontSize: 16, // Slightly larger font size
+      color: '#4CAF50', // A color that indicates success
+    },
+    noteText: {
+      fontSize: 24,
+      fontWeight: 'bold',
+      textAlignVertical: 'top', 
+      color:'white',
+    },
+    noteView: {
+      width:'100%',
+      height:150,
+      paddingTop: 12,
+      paddingBottom: 12,
+      paddingLeft: 16,
+      paddingRight: 16,
+      backgroundColor: '#3BB0E5',
+      borderRadius: 24,
+      borderColor: '#bfebff',
+      borderWidth: 2,
+      shadowColor: '#2C2C2C',
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.05,
+      shadowRadius: 2,
+    },
+    question:{
+      width:'100%',
+    }
+
   });
 
   return (
     <TouchableWithoutFeedback onPress={handleContainerPress}>
       <View style={styles.container}>
         {loading ? (
-          <ActivityIndicator size="large" color="#0000ff" />
+          <ActivityIndicator size="medium" color="#3BB0E5" />
         ) : (
           <>
-            <Text>Generated Question: {generatedQuestion}</Text>
+            <View style={styles.noteView}>
+              <Text style={styles.noteText}>{generatedQuestion}</Text>
+              </View>
             {renderTextInputAndSlider()}
             {submitted ? (
-              <Text style={{ marginTop: 20, fontWeight: 'bold' }}>Today's thought is stored!</Text>
+              <Text style={styles.confirmationText}>Today's thought is stored!</Text>
             ) : (
               <Button
-                size="lg"
                 style={styles.submitButton}
                 onPress={() => {
                   saveDataToSQLite();
                   console.log('User Answer:', userAnswer, 'Regret Level:', regretLevel);
                 }}
               >
-                Submit
+                <Text style={{ color: 'white', fontWeight: '500', fontSize:17, }}>Submit</Text>
               </Button>
             )}
           </>

@@ -97,7 +97,7 @@ const styles = StyleSheet.create({
     paddingBottom: 12,
     paddingLeft: 16,
     paddingRight: 16,
-    backgroundColor: 'white',
+    backgroundColor: '#3BB0E5',
     borderRadius: 24,
     borderColor: '#3BB0E5',
     borderWidth: 1,
@@ -105,6 +105,12 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
     shadowRadius: 2,
+  },
+  dataText:{
+    fontSize: 16,
+    fontWeight: 'bold',
+    textAlignVertical: 'top', 
+    color:'white',
   },
   noteText: {
     fontSize: 14,
