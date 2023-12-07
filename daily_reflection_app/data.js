@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, ActivityIndicator, Text, Button } from 'react-native';
+import { View, StyleSheet, ActivityIndicator, Text } from 'react-native';
 import MonthlySummaryChart from './Monthly'; // Assuming this is your Weekly Chart component
 import WeeklySummaryChart from './weekly'; // Assuming this is your Monthly Chart component
 import * as SQLite from 'expo-sqlite';
 import { Icon } from 'react-native-elements';
+import { NativeBaseProvider, useTheme , Button} from 'native-base';
 import { startOfWeek, endOfWeek, addWeeks, startOfMonth, endOfMonth, addMonths, format } from 'date-fns';
 
-const DataScreen = () => {
+const Chart = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentWeek, setCurrentWeek] = useState(new Date());
@@ -83,9 +84,13 @@ const DataScreen = () => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.navigationContainer}>
-        <Button title="Weekly" onPress={() => setChartType('weekly')} />
-        <Button title="Monthly" onPress={() => setChartType('monthly')} />
+    <View style={styles.navigationContainer}>
+        <Button style={[styles.chartTypeButton, chartType === 'weekly' && styles.selectedChartTypeButton,]} onPress={() => setChartType('weekly')}>
+          <Text style={[styles.chartTypeButtonText, chartType === 'weekly' && styles.selectedChartTypeButtonText,]}> Weekly</Text>
+        </Button>
+        <Button style={[styles.chartTypeButton, chartType === 'monthly' && styles.selectedChartTypeButton,]} onPress={() => setChartType('monthly')}>
+          <Text style={[styles.chartTypeButtonText, chartType === 'monthly' && styles.selectedChartTypeButtonText,]}>Monthly</Text>
+        </Button>
       </View>
       <View style={styles.dateNavigationContainer}>
         <Icon name="chevron-left" type="feather" onPress={() => changePeriod(-1)} />
@@ -130,6 +135,37 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  chartTypeButton: {
+    width: "40%",
+    height: 48,
+    marginTop: 20,
+    marginBottom: 10,
+    padding: 10,
+    borderRadius: 8,
+    borderColor: '#3BB0E5',
+    borderWidth: 1,
+    backgroundColor: '#fff',
+  },
+  selectedChartTypeButton: {
+    backgroundColor: '#3BB0E5',
+  },
+  selectedChartTypeButtonText: {
+    color: 'white', 
+    fontWeight: 'bold',
+  },
+  chartTypeButtonText: {
+    color: '#3BB0E5', 
+  },
 });
 
+const DataScreen = () => {
+  return (
+    <NativeBaseProvider>
+      {/* Wrap your entire app with NativeBaseProvider */}
+      <Chart />
+    </NativeBaseProvider>
+  );
+};
+
 export default DataScreen;
+

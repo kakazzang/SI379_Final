@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, Dimensions } from 'react-native';
 import Svg, { G, Line, Path, Text as SvgText, Circle } from 'react-native-svg';
 import * as d3 from 'd3';
 
@@ -7,9 +7,10 @@ const MonthlySummaryChart = ({ data }) => {
   const chartRef = useRef(null);
   const [chartContent, setChartContent] = useState(null);
 
-  const margin = { top: 20, right: 30, bottom: 50, left: 40 }; // Adjusted left margin
-  const width = 300 - margin.left - margin.right;
-  const height = 200 - margin.top - margin.bottom;
+  const { width: screenWidth } = Dimensions.get('window');
+  const margin = { top: 20, right: 20, bottom: 40, left: 40 };
+  const width = screenWidth - margin.left - margin.right;
+  const height = 300 - margin.top - margin.bottom;
 
   let x, y; // Define x and y outside useEffect
 
@@ -57,8 +58,6 @@ const MonthlySummaryChart = ({ data }) => {
               y={height + margin.bottom - 25}
               fontSize="10"
               textAnchor="middle"
-              transform={`rotate(-90 ${x(new Date(datum.date))},${height + margin.bottom - 32})`}
-              
             >
               {d3.timeFormat('%m/%d')(new Date(datum.date))}
             </SvgText>
@@ -155,18 +154,8 @@ const MonthlySummaryChart = ({ data }) => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 10,
-  },
-  chartContainer: {
-    width: 300,
-    height: 200,
   },
   noDataText: {
     textAlign: 'center',
