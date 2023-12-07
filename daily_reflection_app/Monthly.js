@@ -1,356 +1,166 @@
-import React from 'react';
-// import { View, Text, StyleSheet } from 'react-native';
-import { View, StyleSheet } from 'react-native';
-import { Card, Text } from 'react-native-elements';
+import React, { useRef, useEffect, useState } from 'react';
+import { View, Text, StyleSheet } from 'react-native';
+import Svg, { G, Line, Path, Text as SvgText, Circle } from 'react-native-svg';
 import * as d3 from 'd3';
-import Svg, { G, Path, Text as SvgText, TSpan } from 'react-native-svg';
 
-// import { View, StyleSheet } from 'react-native';
-// import { Card, Text } from 'react-native-elements';
-// import * as d3 from 'd3';
-// import Svg, { G, Path, Text as SvgText, TSpan } from 'react-native-svg';
+const MonthlySummaryChart = ({ data }) => {
+  const chartRef = useRef(null);
+  const [chartContent, setChartContent] = useState(null);
 
-const MonthlySummaryChart = ({ width, data }) => {
-  const height = Math.min(width, 500);
-  const radius = Math.min(width, height) / 2;
+  const margin = { top: 20, right: 30, bottom: 50, left: 40 }; // Adjusted left margin
+  const width = 300 - margin.left - margin.right;
+  const height = 200 - margin.top - margin.bottom;
 
-  const arc = d3.arc()
-    .innerRadius(radius * 0.67)
-    .outerRadius(radius - 1);
+  let x, y; // Define x and y outside useEffect
 
-  const pie = d3.pie()
-    .padAngle(1 / radius)
-    .sort(null)
-    .value(d => d.value);
+  useEffect(() => {
+    if (data && data.length > 0) {
+      x = d3.scaleTime()
+        .domain(d3.extent(data, d => new Date(d.date)))
+        .range([0, width]);
 
-   // Define your custom colors here
-   const customColors = ['#FF0000', '#FF7400', '#FFC100', '#79c314', '#487de7', '#4b369d', '#70369d', '#FF0000', '#FF7400', '#FFC100', '#79c314', '#487de7', '#4b369d', '#70369d'];
+      y = d3.scaleLinear()
+        // .domain([0, d3.max(data, d => d.regretLevel)])
+        .domain([0, 5])
+        .range([height, 0]);
 
-  const color = d3.scaleOrdinal()
-    .domain(data.map(d => d.month))
-    // .range(d3.schemeCategory10);
-    .range(customColors);
+      const line = d3.line()
+        .x(d => x(new Date(d.date)))
+        .y(d => y(d.regretLevel));
 
-  const svg = (
-    <Svg
-      width={width}
-      height={height}
-      viewBox={[-width / 2, -height / 2, width, height]}
-      style={{ maxWidth: '100%', height: 'auto' }}
-    >
-      <G>
-        {pie(data).map((d, index) => (
-          <Path
-            key={index}
-            fill={color(d.data.month)}
-            d={arc(d)}
+      const linePath = line(data);
+
+      // Set the chart content to be rendered outside of useEffect
+      setChartContent(
+        <G transform={`translate(${margin.left}, ${margin.top})`}>
+          {/* x-axis */}
+          <Line
+            x1={0}
+            y1={height}
+            x2={width + 20}
+            y2={height}
+            stroke="black"
           />
-        ))}
-      </G>
-      <G fontFamily="sans-serif" fontSize={12} textAnchor="middle">
-        {pie(data).map((d, index) => (
-          <SvgText
-            key={index}
-            transform={`translate(${arc.centroid(d)})`}
-          >
-            <TSpan dy="-0.4em" fontWeight="bold">{d.data.month}</TSpan>
-            {(d.endAngle - d.startAngle) > 0.25 && (
-              <TSpan x={0} dy="1.5em" fillOpacity={0.7}>
-                {d.data.value.toLocaleString("en-US")}
-              </TSpan>
-            )}
-          </SvgText>
-        ))}
-      </G>
-    </Svg>
-  );
 
-//   return (
-//     <View>
-//       <Text style={styles.title}>Monthly Satisfaction Score Summary</Text>
-//       {svg}
-//     </View>
-//   );
-// };
-return (
-  <Card containerStyle={styles.card}>
-    <Card.Title style={styles.title}>Monthly Satisfaction Score Summary</Card.Title>
-    <Card.Divider />
-    <View style={styles.chartContainer}>
-      {svg}
+          {/* Arrowhead for x-axis */}
+          <Path
+            // d={`M${width},${height} L${width - 8},${height - 6} L${width - 8},${height + 6} Z`}
+            // d={`M${width + 10},${height} L${width + 2},${height - 6} L${width + 2},${height + 6} Z`}
+            d={`M${width + 20},${height} L${width + 12},${height - 6} L${width + 12},${height + 6} Z`}
+            fill="black"
+          />
+
+          {/* x-axis labels */}
+          {data.map((datum, index) => (
+            <SvgText
+              key={index}
+              x={x(new Date(datum.date))}
+              y={height + margin.bottom - 25}
+              fontSize="10"
+              textAnchor="middle"
+              transform={`rotate(-90 ${x(new Date(datum.date))},${height + margin.bottom - 32})`}
+              
+            >
+              {d3.timeFormat('%m/%d')(new Date(datum.date))}
+            </SvgText>
+          ))}
+          
+          {/* x-axis title */}
+          <SvgText
+            x={width / 2}
+            y={height + margin.bottom / 1.}
+            fontSize="12"
+            textAnchor="middle"
+            fontWeight="bold"
+          >
+            Date
+          </SvgText>
+
+          {/* y-axis */}
+          <Line
+            x1={0}
+            y1={-10}
+            x2={0}
+            y2={height}
+            stroke="black"
+          />
+
+          {/* Arrowhead for y-axis (adjusted) */}
+          <Path
+            d={`M0,${-10} L-6,${-4} L6,${-4} Z`}
+            fill="black"
+          />
+
+          {/* y-axis labels */}
+          {d3.range(0, 10).map((tick) => (
+            <SvgText
+              key={tick}
+              x={-margin.left + 30}
+              y={y(tick)}
+              fontSize="10"
+              textAnchor="end"
+              dy="3"
+            >
+              {tick}
+            </SvgText>
+          ))}
+
+            <SvgText
+              x={-margin.left / 2}
+              y={height / 2.3}
+              fontSize="12"
+              textAnchor="middle"
+              transform={`rotate(-90 ${-margin.left / 2},${height / 2})`}
+              fontWeight="bold"
+            >
+              Regret Level
+            </SvgText>
+
+          {/* Line chart path */}
+          <Path d={linePath} fill="none" stroke="steelblue" strokeWidth={1.5} />
+
+          {/* Circles at each data point */}
+          {data.map((datum, index) => (
+            <Circle
+              key={index}
+              cx={x(new Date(datum.date))}
+              cy={y(datum.regretLevel)}
+              r={4} 
+              fill="#3BB0E5" 
+            />
+          ))}
+        </G>
+      );
+    }
+  }, [data]);
+
+  return (
+    <View style={styles.container}>
+      <Text style={styles.title}>11/27-12/4 Satisfaction Score Summary</Text>
+      <View style={styles.chartContainer}>
+        <Svg width={width + margin.left + margin.right} height={height + margin.top + margin.bottom} ref={chartRef}>
+          {chartContent}
+        </Svg>
+      </View>
     </View>
-  </Card>
-);
+  );
 };
 
-// const styles = StyleSheet.create({
-//   title: {
-//     fontSize: 18,
-//     fontWeight: 'bold',
-//     textAlign: 'center',
-//     marginBottom: 10,
-//   },
-// });
 const styles = StyleSheet.create({
-  card: {
-    margin: 10,
-    borderRadius: 10,
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   title: {
     fontSize: 18,
     fontWeight: 'bold',
-    textAlign: 'center',
+    marginBottom: 10,
   },
   chartContainer: {
-    alignItems: 'center',
+    width: 300,
+    height: 200,
   },
 });
 
 export default MonthlySummaryChart;
-
-// const MonthlySummaryChart = ({ width, data }) => {
-
-//   // include count of scores for each month
-//   const aggregatedData = data.reduce((acc, entry) => {
-//     const existingEntry = acc.find(item => item.month === entry.month);
-//     if (existingEntry) {
-//       existingEntry.count += 1;
-//       existingEntry.totalScore += entry.score;
-//     } else {
-//       acc.push({
-//         month: entry.month,
-//         count: 1,
-//         totalScore: entry.score,
-//       });
-//     }
-//     return acc;
-//   }, []);
-
-//   const height = Math.min(width, 500);
-//   const radius = Math.min(width, height) / 2;
-
-//   const arc = d3.arc()
-//     .innerRadius(radius * 0.67)
-//     .outerRadius(radius - 1);
-
-//   const pie = d3.pie()
-//     .padAngle(1 / radius)
-//     .sort(null)
-//     .value(d => d.value);
-
-//    // Define your custom colors here
-//    const customColors = ['#FF0000', '#FF7400', '#FFC100', '#79c314', '#487de7', '#4b369d', '#70369d', '#FF0000', '#FF7400', '#FFC100', '#79c314', '#487de7', '#4b369d', '#70369d'];
-
-//   const color = d3.scaleOrdinal()
-//     .domain(data.map(d => d.month))
-//     // .range(d3.schemeCategory10);
-//     .range(customColors);
-
-//   const svg = (
-//     <Svg
-//       width={width}
-//       height={height}
-//       viewBox={[-width / 2, -height / 2, width, height]}
-//       style={{ maxWidth: '100%', height: 'auto' }}
-//     >
-//       <G>
-//         {pie(data).map((d, index) => (
-//           <Path
-//             key={index}
-//             fill={color(d.data.month)}
-//             d={arc(d)}
-//           />
-//         ))}
-//       </G>
-//       <G fontFamily="sans-serif" fontSize={12} textAnchor="middle">
-//         {pie(data).map((d, index) => (
-//           <SvgText
-//             key={index}
-//             transform={`translate(${arc.centroid(d)})`}
-//           >
-//             <TSpan dy="-0.4em" fontWeight="bold">{d.data.month}</TSpan>
-//             {(d.endAngle - d.startAngle) > 0.25 && (
-//               <TSpan x={0} dy="1.5em" fillOpacity={0.7}>
-//                 {d.data.value.toLocaleString("en-US")}
-//               </TSpan>
-//             )}
-//           </SvgText>
-//         ))}
-//       </G>
-//     </Svg>
-//   );
-
-// //   return (
-// //     <View>
-// //       <Text style={styles.title}>Monthly Satisfaction Score Summary</Text>
-// //       {svg}
-// //     </View>
-// //   );
-// // };
-// return (
-//   <Card containerStyle={styles.card}>
-//     <Card.Title style={styles.title}>Monthly Satisfaction Score Summary</Card.Title>
-//     <Card.Divider />
-//     <View style={styles.chartContainer}>
-//       {svg}
-//     </View>
-//   </Card>
-// );
-// };
-
-// // const styles = StyleSheet.create({
-// //   title: {
-// //     fontSize: 18,
-// //     fontWeight: 'bold',
-// //     textAlign: 'center',
-// //     marginBottom: 10,
-// //   },
-// // });
-// const styles = StyleSheet.create({
-//   card: {
-//     margin: 10,
-//     borderRadius: 10,
-//   },
-//   title: {
-//     fontSize: 18,
-//     fontWeight: 'bold',
-//     textAlign: 'center',
-//   },
-//   chartContainer: {
-//     alignItems: 'center',
-//   },
-// });
-
-// export default MonthlySummaryChart;
-
-// import React from 'react';
-// import { View } from 'react-native';
-// import { Svg, G, Line, Circle, Text } from 'react-native-svg';
-// import * as d3 from 'd3';
-
-// const MonthlySummaryChart = ({ data, width, height }) => {
-//   // Set margins and dimensions
-//   const margin = { top: 20, right: 20, bottom: 30, left: 30 };
-//   const innerWidth = width - margin.left - margin.right;
-//   const innerHeight = height - margin.top - margin.bottom;
-
-//   // Extract x and y values from data
-//   const xValues = data.map(d => d.x);
-//   const yValues = data.map(d => d.y);
-
-//   // Create scales
-//   const xScale = d3.scaleLinear().domain([d3.min(xValues), d3.max(xValues)]).range([0, innerWidth]);
-//   const yScale = d3.scaleLinear().domain([0, d3.max(yValues)]).range([innerHeight, 0]);
-
-//   // Generate line function
-//   const line = d3.line().x(d => xScale(d.x)).y(d => yScale(d.y));
-
-//   return (
-//     <View>
-//       <Svg width={width} height={height}>
-//         <G transform={`translate(${margin.left},${margin.top})`}>
-//           {/* Draw line */}
-//           <Line
-//             x1={0}
-//             y1={yScale(d3.max(yValues))}
-//             x2={innerWidth}
-//             y2={yScale(d3.max(yValues))}
-//             stroke="black"
-//           />
-          
-//           {/* Draw markers */}
-//           {data.map((d, index) => (
-//             <G key={index} transform={`translate(${xScale(d.x)},${yScale(d.y)})`}>
-//               <Circle r={5} fill="blue" />
-//               <Text
-//                 x={10}
-//                 y={-10}
-//                 fontSize={12}
-//                 fill="black"
-//                 textAnchor="middle"
-//               >
-//                 {d.y}
-//               </Text>
-//             </G>
-//           ))}
-
-//           {/* Draw line */}
-//           <Line
-//             d={line(data)}
-//             fill="none"
-//             stroke="blue"
-//             strokeWidth={2}
-//           />
-//         </G>
-//       </Svg>
-//     </View>
-//   );
-// };
-
-// export default MonthlySummaryChart;
-
-// import React from 'react';
-// import { View } from 'react-native';
-// import { Svg, G, Line, Circle, Text } from 'react-native-svg';
-// import * as d3 from 'd3';
-
-// import React from 'react';
-// import { View } from 'react-native';
-// import { LineChart, XAxis, YAxis } from 'react-native-svg';
-// import * as shape from 'd3-shape';
-
-// const MonthlySummaryChart = ({ data }) => {
-//   const width = 928;
-//   const height = 500;
-//   const marginTop = 20;
-//   const marginRight = 30;
-//   const marginBottom = 30;
-//   const marginLeft = 40;
-
-//   const xValues = data.map(d => d.date);
-//   const yValues = data.map(d => d.close);
-
-//   const xScale = d3.scaleUtc()
-//     .domain(d3.extent(xValues))
-//     .range([marginLeft, width - marginRight]);
-
-//   const yScale = d3.scaleLinear()
-//     .domain([0, d3.max(yValues)])
-//     .range([height - marginBottom, marginTop]);
-
-//   const line = d3.line()
-//     .x(d => xScale(d.date))
-//     .y(d => yScale(d.close))
-//     .curve(shape.curveMonotoneX);
-
-//   return (
-//     <View>
-//       <LineChart
-//         style={{ height, width }}
-//         data={data}
-//         yAccessor={({ item }) => item.close}
-//         xAccessor={({ item }) => item.date}
-//         svg={{ stroke: 'steelblue', strokeWidth: 2 }}
-//         curve={shape.curveMonotoneX}
-//       />
-//       <XAxis
-//         data={data}
-//         xAccessor={({ item }) => item.date}
-//         scale={xScale}
-//         contentInset={{ left: 10, right: 10 }}
-//         formatLabel={(value, index) => index}
-//         numberOfTicks={width / 80}
-//         svg={{ fontSize: 10, fill: 'black' }}
-//       />
-//       <YAxis
-//         data={data}
-//         yAccessor={({ item }) => item.close}
-//         scale={yScale}
-//         contentInset={{ top: 20, bottom: 20 }}
-//         svg={{ fontSize: 10, fill: 'black' }}
-//       />
-//     </View>
-//   );
-// };
-
-// export default MonthlySummaryChart;
