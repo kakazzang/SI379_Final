@@ -3,6 +3,8 @@
 Installation
 To get started with this project, follow these steps:
 
+Download Expo Go at IOS app store
+
 Clone the Repository
 
 git clone https://github.com/kakazzang/SI379_Final.git
