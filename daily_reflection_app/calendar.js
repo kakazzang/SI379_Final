@@ -82,7 +82,7 @@ const CalendarScreen = () => {
             <Text style={styles.dataText}>Regret Level: {notes[selectedDate].regretLevel}</Text>
           </View>
           <View style={styles.noteView}>
-            <Text style={styles.noteText}>User Answer: {notes[selectedDate].userAnswer}</Text>
+            <Text style={styles.noteText}>{notes[selectedDate].userAnswer}</Text>
           </View>
         </>
       ) : null}
