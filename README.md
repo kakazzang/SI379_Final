@@ -27,4 +27,4 @@ After running this command, a new browser tab will open with the Expo developer 
 Usage
 Before using the application, you need to set up your own ChatGPT key. Follow these steps:
 
-The API key is in the doc we submitted. 
+The API key is located in this document: https://docs.google.com/document/d/1YfkuabBK65hPV5lqIYoqQNqkQGNtUS0-YHqfW1qxL34/edit?usp=sharing
