@@ -37,7 +37,7 @@ const Linec = ({ data }) => {
           <Line
             x1={0}
             y1={height}
-            x2={width + 10}
+            x2={width + 20}
             y2={height}
             stroke="black"
           />
@@ -45,7 +45,8 @@ const Linec = ({ data }) => {
           {/* Arrowhead for x-axis */}
           <Path
             // d={`M${width},${height} L${width - 8},${height - 6} L${width - 8},${height + 6} Z`}
-            d={`M${width + 10},${height} L${width + 2},${height - 6} L${width + 2},${height + 6} Z`}
+            // d={`M${width + 10},${height} L${width + 2},${height - 6} L${width + 2},${height + 6} Z`}
+            d={`M${width + 20},${height} L${width + 12},${height - 6} L${width + 12},${height + 6} Z`}
             fill="black"
           />
 
