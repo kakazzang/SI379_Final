@@ -1,9 +1,10 @@
+
 import React from 'react';
 import { View, StyleSheet, StatusBar } from 'react-native';
 import MonthlySummaryChart from './monthly';
 import SummaryNavigation from './summarynav';
 
-const Data = () => {
+const DataScreen = () => {
   const data = [
   { date: "2023-11-28", regretLevel: 1 },
   { date: "2023-11-29", regretLevel: 2 },
@@ -23,8 +24,9 @@ const Data = () => {
       <MonthlySummaryChart data={data} />
       {/* <SummaryNavigation /> */}
     </View>
-  );
-};
+)
+
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -35,4 +37,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Data;
+export default DataScreen;
