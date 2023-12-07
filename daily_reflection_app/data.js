@@ -1,259 +1,135 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, ActivityIndicator, Text } from 'react-native';
-import { Icon } from 'react-native-elements';
-import MonthlySummaryChart from './Monthly'; // This is weekly 
-import WeeklySummaryChart from './weekly'; // This is monthly
+import { View, StyleSheet, ActivityIndicator, Text, Button } from 'react-native';
+import MonthlySummaryChart from './Monthly'; // Assuming this is your Weekly Chart component
+import WeeklySummaryChart from './weekly'; // Assuming this is your Monthly Chart component
 import * as SQLite from 'expo-sqlite';
-import { startOfWeek, endOfWeek, addWeeks, format } from 'date-fns';
+import { Icon } from 'react-native-elements';
+import { startOfWeek, endOfWeek, addWeeks, startOfMonth, endOfMonth, addMonths, format } from 'date-fns';
 
 const DataScreen = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentWeek, setCurrentWeek] = useState(new Date());
+  const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [chartType, setChartType] = useState('weekly'); // 'weekly' or 'monthly'
 
   // Open or create the database
   const db = SQLite.openDatabase('data.db');
 
-  // Function to fetch data from the database
-  const fetchDataFromDatabase = () => {
-    db.transaction((tx) => {
-      tx.executeSql(
-        'SELECT date, regretLevel FROM data;',
-        [],
-        (tx, results) => {
-          const newData = [];
-
-          for (let i = 0; i < results.rows.length; i++) {
-            const row = results.rows.item(i);
-            newData.push({
-              date: row.date,
-              regretLevel: row.regretLevel,
-            });
-          }
-          setData(newData);
-          setLoading(false);
-        },
-        (tx, error) => {
-          console.error('Error fetching data:', error);
-        }
-      );
-    });
-  };
-
+  // Fetch data from the database
   useEffect(() => {
+    const fetchDataFromDatabase = () => {
+      db.transaction((tx) => {
+        tx.executeSql(
+          'SELECT date, regretLevel FROM data;',
+          [],
+          (tx, results) => {
+            const newData = [];
+            for (let i = 0; i < results.rows.length; i++) {
+              const row = results.rows.item(i);
+              newData.push({
+                date: row.date,
+                regretLevel: row.regretLevel,
+              });
+            }
+            setData(newData);
+            setLoading(false);
+          },
+          (tx, error) => {
+            console.error('Error fetching data:', error);
+          }
+        );
+      });
+    };
+
     fetchDataFromDatabase();
   }, []);
 
-  const filterDataForWeek = (data, weekStartDate) => {
-    const weekEndDate = endOfWeek(weekStartDate);
-    return data.filter(item => {
-      const itemDate = new Date(item.date);
-      return itemDate >= weekStartDate && itemDate <= weekEndDate;
-    });
+  // Filter data based on the current week or month
+  const filterData = () => {
+    if (chartType === 'weekly') {
+      const weekStartDate = startOfWeek(currentWeek);
+      const weekEndDate = endOfWeek(currentWeek);
+      return data.filter(item => {
+        const itemDate = new Date(item.date);
+        return itemDate >= weekStartDate && itemDate <= weekEndDate;
+      });
+    } else {
+      const monthStartDate = startOfMonth(currentMonth);
+      const monthEndDate = endOfMonth(currentMonth);
+      return data.filter(item => {
+        const itemDate = new Date(item.date);
+        return itemDate >= monthStartDate && itemDate <= monthEndDate;
+      });
+    }
   };
 
-  const changeWeek = (numberOfWeeks) => {
-    setCurrentWeek(addWeeks(currentWeek, numberOfWeeks));
+  // Change week or month
+  const changePeriod = (amount) => {
+    if (chartType === 'weekly') {
+      setCurrentWeek(addWeeks(currentWeek, amount));
+    } else {
+      setCurrentMonth(addMonths(currentMonth, amount));
+    }
   };
 
+  // Loading indicator
   if (loading) {
     return <ActivityIndicator size="large" color="#0000ff" />;
   }
 
-  const weeklyData = filterDataForWeek(data, startOfWeek(currentWeek));
+  // Filtered data for the chart
+  const filteredData = filterData();
 
   return (
     <View style={styles.container}>
       <View style={styles.navigationContainer}>
-        <Icon
-          name="chevron-left"
-          type="feather"
-          onPress={() => changeWeek(-1)}
-          size={30}
-          color="#3BB0E5"
-        />
-        <Text style={styles.weekText}>Week of {format(startOfWeek(currentWeek), 'MMM do')}</Text>
-        <Icon
-          name="chevron-right"
-          type="feather"
-          onPress={() => changeWeek(1)}
-          size={30}
-          color="#3BB0E5"
-        />
+        <Button title="Weekly" onPress={() => setChartType('weekly')} />
+        <Button title="Monthly" onPress={() => setChartType('monthly')} />
       </View>
-      <MonthlySummaryChart data={weeklyData} /> 
-      {/* <WeeklySummaryChart data={monthlyData} /> */}
-      </View> 
-    ) 
-  }
+      <View style={styles.dateNavigationContainer}>
+        <Icon name="chevron-left" type="feather" onPress={() => changePeriod(-1)} />
+        <Text style={styles.dateText}>
+          {chartType === 'weekly'
+            ? `Week of ${format(startOfWeek(currentWeek), 'MMM do')}`
+            : `Month of ${format(startOfMonth(currentMonth), 'MMM yyyy')}`}
+        </Text>
+        <Icon name="chevron-right" type="feather" onPress={() => changePeriod(1)} />
+      </View>
+      <View style={styles.chartContainer}>
+        {chartType === 'weekly'
+          ? <MonthlySummaryChart data={filteredData} />
+          : <WeeklySummaryChart data={filteredData} />}
+      </View>
+    </View>
+  );
+};
 
 const styles = StyleSheet.create({
-  chart:{
-    flex:1,
-  },
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
     backgroundColor: 'white',
   },
-  weekText: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginVertical: 10,
-  },
   navigationContainer: {
-    marginTop:60,
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    padding: 10,
+  },
+  dateNavigationContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    width: '100%',
-    marginBottom: 20,
+    padding: 10,
+  },
+  dateText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  chartContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
 
 export default DataScreen;
-
-// NEW CODE HERE // NEW CODE HERE// NEW CODE HERE// NEW CODE HERE// NEW CODE HERE// NEW CODE HERE// NEW CODE HERE// NEW CODE HERE// NEW CODE HERE// NEW CODE HERE// NEW CODE HERE
-// import React, { useState, useEffect } from 'react';
-// import { View, StyleSheet, ActivityIndicator, Text } from 'react-native';
-// import { Icon } from 'react-native-elements';
-// // import MonthlySummaryChart from './Monthly'; // This is weekly 
-// import WeeklySummaryChart from './weekly'; // This is monthly
-// import * as SQLite from 'expo-sqlite';
-// import { startOfMonth, endOfMonth, addMonths, format } from 'date-fns'; // NEW
-
-// const DataScreen = () => {
-//   const [data, setData] = useState([]);
-//   const [loading, setLoading] = useState(true);
-//   const [currentMonth, setCurrentMonth] = useState(new Date()); // NEW
-
-//   // Open or create the database
-//   const db = SQLite.openDatabase('data.db');
-
-//   // Function to fetch data from the database
-//   const fetchDataFromDatabase = () => {
-//     db.transaction((tx) => {
-//       tx.executeSql(
-//         'SELECT date, regretLevel FROM data;',
-//         [],
-//         (tx, results) => {
-//           const newData = [];
-
-//           for (let i = 0; i < results.rows.length; i++) {
-//             const row = results.rows.item(i);
-//             newData.push({
-//               date: row.date,
-//               regretLevel: row.regretLevel,
-//             });
-//           }
-//           setData(newData);
-//           setLoading(false);
-//         },
-//         (tx, error) => {
-//           console.error('Error fetching data:', error);
-//         }
-//       );
-//     });
-//   };
-
-//   useEffect(() => {
-//     fetchDataFromDatabase();
-//   }, []);
-
-//   const filterDataForMonth = (data, monthStartDate) => {
-//     const monthEndDate = endOfMonth(monthStartDate);
-//     return data.filter(item => {
-//       const itemDate = new Date(item.date);
-//       return itemDate >= monthStartDate && itemDate <= monthEndDate;
-//     });
-//   };
-//   // NEW
-
-//   const changeMonth = (numberOfMonths) => {
-//     setCurrentMonth(addMonths(currentMonth, numberOfMonths));
-//   };
-//   // NEW
-
-//   const calculateAverageForMonth = (monthly_data) => {
-//     if (monthly_data.length === 0) {
-//       return 0;
-//     }
-
-//   const totalRegret = monthlyData.reduce((sum, item) => sum + item.regretLevel, 0);
-//     return totalRegret / monthlyData.length;
-//   };
-
-//   if (loading) {
-//     return <ActivityIndicator size="large" color="#0000ff" />;
-//   }
-
-//   const monthlyData = filterDataForMonth(data, startOfMonth(currentMonth)); // NEW
-//   const averageRegretForMonth = calculateAverageForMonth(monthlyData);
-
-//   return (
-//     <View style={styles.container}>
-//       <View style={styles.navigationContainer}>
-//         {/* <Icon
-//           name="chevron-left"
-//           type="feather"
-//           onPress={() => changeMonth(-1)}
-//           size={30}
-//           color="#3BB0E5"
-//         /> */}
-//         {/* <Text style={styles.weekText}>
-//           Month of {format(startOfMonth(currentMonth), 'MMM')}, Avg Regret: {averageRegretForMonth.toFixed(2)}
-//           Monthly Average Regret Level
-//         </Text> */}
-//         {/* <Text style={styles.weekText}>Week of {format(startOfMonth(currentMonth), 'MMM do')}</Text> */}
-//         {/* <Icon
-//           name="chevron-right"
-//           type="feather"
-//           onPress={() => changeMonth(1)}
-//           size={30}
-//           color="#3BB0E5"
-//         /> */}
-//       </View>
-//       <Text style={styles.weekText}>
-//           Month of {format(startOfMonth(currentMonth), 'MMM')}, Avg Regret: {averageRegretForMonth.toFixed(2)}
-//           {/* Monthly Average Regret Level */}
-//         </Text>
-//       {/* <View style={styles.chart}> */}
-//       <View style={{ flex: 1, width: '100%', height: '100%' }}>
-//         {/* <MonthlySummaryChart data={weeklyData} />  */}
-//         <WeeklySummaryChart averageRegretForMonth={averageRegretForMonth} data={monthlyData} />
-//       </View>
-//     </View>
-  
-  
-// )
-
-// }
-
-// const styles = StyleSheet.create({
-//   chart:{
-//     flex:1,
-//   },
-//   container: {
-//     flex: 1,
-//     justifyContent: 'center',
-//     alignItems: 'center',
-//     backgroundColor: 'white',
-//   },
-//   weekText: {
-//     fontSize: 18,
-//     fontWeight: 'bold',
-//     marginVertical: 10,
-//   },
-//   navigationContainer: {
-//     marginTop:60,
-//     flexDirection: 'row',
-//     justifyContent: 'space-between',
-//     alignItems: 'center',
-//     width: '100%',
-//     marginBottom: 20,
-//   },
-// });
-
-// export default DataScreen;
-

@@ -20,7 +20,6 @@ const MonthlySummaryChart = ({ data }) => {
         .range([0, width]);
 
       y = d3.scaleLinear()
-        // .domain([0, d3.max(data, d => d.regretLevel)])
         .domain([0, 5])
         .range([height, 0]);
 
@@ -134,9 +133,11 @@ const MonthlySummaryChart = ({ data }) => {
     } else {
       // Set message when there's not enough data
       setChartContent(
+      <View style={styles.noDataText}>
         <Text style={styles.noDataText}>
-          There are not enough data to create a chart.
+          Not enough data to create a chart.
         </Text>
+      </View>
       );
     }
   }, [data]);
@@ -167,6 +168,9 @@ const styles = StyleSheet.create({
     width: 300,
     height: 200,
   },
+  noDataText: {
+    textAlign: 'center',
+  }
 });
 
 export default MonthlySummaryChart;
