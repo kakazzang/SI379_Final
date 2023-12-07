@@ -190,8 +190,8 @@ const ChatGPTDemo = () => {
     if (submitted) {
       return (
         <View style={{ marginTop: 10, opacity: 0.5 }}>
-          <Text>{userAnswer}</Text>
-          <Text>Regret Level: {regretLevel}</Text>
+          {/* <Text style={styles.submittedText}>{userAnswer}</Text>
+          <Text style={styles.submittedText}>Regret Level: {regretLevel}</Text> */}
         </View>
       );
     }
